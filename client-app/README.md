@@ -19,3 +19,14 @@ src/
 │ └── globals.css // 전역 스타일 파일
 └── styles/
 └── common.module.css // 공통 스타일 파일
+
+app/
+boards/ // boards 관련 경로
+components/ // 컴포넌트 폴더
+BoardTable.tsx // 게시판 목록 테이블 컴포넌트
+BoardForm.tsx // 게시물 추가 폼 컴포넌트
+page.tsx // /boards 페이지 경로
+[id]/ // 동적 라우트 폴더 (특정 게시물 상세 페이지)
+page.tsx // /boards/[id] 경로 페이지
+globals.css // 전역 스타일
+layout.tsx // 레이아웃 설정 파일

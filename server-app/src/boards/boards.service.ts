@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Board } from './board.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -60,5 +60,17 @@ export class BoardsService {
       message: '게시물이 성공적으로 생성되었습니다!',
       data: savedBoard,
     };
+  }
+
+  // ID로 게시물 조회
+  async getBoardById(id: number): Promise<Board> {
+    const board = await this.boardRepository.findOneBy({ id });
+
+    // 게시물이 없으면 예외 발생
+    if (!board) {
+      throw new NotFoundException(`ID ${id}에 해당하는 게시물이 존재하지 않습니다.`);
+    }
+
+    return board;
   }
 }
