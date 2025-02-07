@@ -35,6 +35,8 @@ export default function BoardsPage() {
         if (response.status === 200) {
           // 상태 코드가 200일 때 처리
           const result = await response.json();
+          // 콘솔 로그 추가
+          console.log("데이터 조회 결과:", result);
           //setMessage(result.message);
           setBoards(result.data || []);
         } else if (response.status === 404) {
@@ -97,12 +99,42 @@ export default function BoardsPage() {
     return <p>데이터를 불러오는 중입니다...</p>;
   }
 
+  // 게시물 수정 핸들러
+  const handleEditClick = (boardId: number) => {
+    console.log("수정 클릭:", boardId);
+    router.push(`/boards/edit/${boardId}`); // 수정 페이지로 이동 또는 수정 기능 실행
+  };
+
+  // 게시물 삭제 핸들러
+  const handleDeleteClick = async (boardId: number) => {
+    try {
+      const response = await fetch(`http://localhost:9801/boards/${boardId}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response.status === 200) {
+        console.log("게시물 삭제 성공:", boardId);
+        // setBoards((prev) => prev.filter((board) => board.id !== boardId)); // 상태에서 삭제된 게시물 제거
+      } else {
+        console.error("게시물 삭제 실패:", response.statusText);
+      }
+    } catch (error) {
+      console.error("게시물 삭제 중 오류 발생:", error);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Boards</h1>
       <BoardForm onAddBoard={addBoard} />
       {boards.length > 0 ? (
-        <BoardTable boards={boards} onRowClick={handleRowClick} />
+        <BoardTable
+          boards={boards}
+          onRowClick={handleRowClick}
+          onEditClick={handleEditClick} // 수정 버튼 핸들러 전달
+          onDeleteClick={handleDeleteClick} // 삭제 버튼 핸들러 전달
+        />
       ) : (
         <p>현재 게시물이 없습니다.</p>
       )}

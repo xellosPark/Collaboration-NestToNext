@@ -1,4 +1,8 @@
-import { Body, Controller, Get, Post, Logger, HttpCode, HttpStatus, HttpException, ParseIntPipe, Param, NotFoundException } from '@nestjs/common';
+import {
+  Body, Controller, Get, Post, Logger, HttpCode, HttpStatus, HttpException,
+  ParseIntPipe, Param, NotFoundException, UsePipes, ValidationPipe,
+  Delete
+} from '@nestjs/common';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { Board } from './board.entity';
@@ -53,6 +57,11 @@ export class BoardsController {
   // }
 
   @Post('/')
+  // @UsePipes(ValidationPipe)는 NestJS에서 데이터를 유효성 검사하고 변환하는 데 사용되는
+  // 파이프를 적용하는 데코레이터입니다. ValidationPipe는 특히 DTO(Data Transfer Object)
+  // 클래스와 함께 사용되어, 클라이언트에서 전송된 데이터가 예상한 형식과 규칙을 따르는지 검증하는
+  // 데 도움을 줍니다.
+  // @UsePipes(ValidationPipe) // 유효성 검사 파이프 추가
   async createPost(@Body() createBoardDto: CreateBoardDto): Promise<{ message: string; data: Board }> {
     this.logger.verbose(`createPost 호출`);
 
@@ -73,7 +82,7 @@ export class BoardsController {
 
   // 특정 ID의 게시물 조회
   @Get('/:id')
-  async getBoardById(@Param('id') id: number): Promise<{ message: string; data: Board }> {
+  async getBoardById(@Param('id', ParseIntPipe) id: number): Promise<{ message: string; data: Board }> {
     this.logger.verbose(`getBoardById 호출 - ID: ${id}`);
 
     try {
@@ -91,6 +100,29 @@ export class BoardsController {
       }
 
       console.error('게시물 조회 중 오류 발생:', error);
+      throw new HttpException('서버 오류 발생!', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  // 특정 ID의 게시물 삭제
+  @Delete('/:id')
+  async deleteBoardById(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+    this.logger.verbose(`deleteBoardById 호출 - ID: ${id}`);
+
+    try {
+      // 서비스 호출로 삭제 처리
+      await this.boardsService.deleteBoardById(id);
+
+      // 상태 코드 200과 함께 성공 메시지 반환
+      return {
+        message: '게시물 삭제 성공!',
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error; // 이미 처리된 예외는 그대로 반환
+      }
+
+      console.error('게시물 삭제 중 오류 발생:', error);
       throw new HttpException('서버 오류 발생!', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

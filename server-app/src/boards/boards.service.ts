@@ -73,4 +73,28 @@ export class BoardsService {
 
     return board;
   }
+
+  // // 게시물 삭제 메서드 (DB 삭제제)
+  // async deleteBoardById(id: number): Promise<void> {
+  //   const result = await this.boardRepository.delete(id);
+
+  //   // 게시물이 없는 경우 예외 발생
+  //   if (result.affected === 0) {
+  //     throw new NotFoundException(`ID ${id}에 해당하는 게시물이 존재하지 않습니다.`);
+  //   }
+  // }
+
+  // 게시물 소프트 삭제 메서드 (deletedAt 타이머 추가)
+  async deleteBoardById(id: number): Promise<void> {
+    const board = await this.boardRepository.findOneBy({ id });
+
+    // 게시물이 없는 경우 예외 발생
+    if (!board) {
+      throw new NotFoundException(`ID ${id}에 해당하는 게시물이 존재하지 않습니다.`);
+    }
+
+    // `deletedAt` 필드를 현재 시간으로 업데이트
+    board.deletedAt = new Date();
+    await this.boardRepository.save(board);
+  }
 }
